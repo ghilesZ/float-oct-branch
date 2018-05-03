@@ -1,0 +1,26 @@
+/*
+  TODO
+
+  An abstract fixpoint solver based on Constraint Programming
+
+  Author: Antoine Mine
+  Copyright 2015
+*/
+
+
+init {
+  x=[12,12];
+  y=[16,16];
+}
+
+body {
+  x1 = 3*x/4 + y/4;
+  y1 = x/4 + 3*y/4;
+  x = x1;
+  y = y1;
+}
+
+goal {
+  x=[0,100];
+  y=[0,100];
+}

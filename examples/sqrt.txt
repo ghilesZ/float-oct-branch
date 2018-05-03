@@ -1,0 +1,28 @@
+/*
+  An abstract fixpoint solver based on Constraint Programming
+
+  Example file from Leopold Haller's benchmark
+  Simple polynomial interpolation function for square root.
+
+  =>
+  we can prove that the output is <= 1.5
+  we cannot prove any tighter bound (such as 1.4 or 1.39844)
+
+  Author: Antoine Mine
+  Copyright 2015
+*/
+
+
+init {
+  x=[0,1];
+  out=[0,0];
+}
+
+body {
+  out = 1 + 0.5*x - 0.125*x*x + 0.0625*x*x*x - 0.0390625*x*x*x*x;
+}
+
+goal {
+  x=[0,1];
+  out=[0,1.5];
+}

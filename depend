@@ -1,0 +1,48 @@
+frontend/file_parser.cmx : frontend/syntax.cmx frontend/parser.cmx \
+    frontend/lexer.cmx
+frontend/lexer.cmx : frontend/syntax.cmx \
+    /home/gg/.opam/4.05.0/lib/zarith/q.cmi frontend/parser.cmx
+frontend/parser.cmx : frontend/syntax.cmx \
+    /home/gg/.opam/4.05.0/lib/zarith/q.cmi frontend/parser.cmi
+frontend/syntax.cmx : /home/gg/.opam/4.05.0/lib/zarith/q.cmi
+libs/abstract_apron.cmx : /home/gg/.opam/4.05.0/lib/zarith/z.cmi \
+    frontend/syntax.cmx /home/gg/.opam/4.05.0/lib/zarith/q.cmi \
+    /home/gg/.opam/4.05.0/lib/apron/polka.cmi \
+    /home/gg/.opam/4.05.0/lib/apron/oct.cmi \
+    /home/gg/.opam/4.05.0/lib/gmp/mpz.cmx \
+    /home/gg/.opam/4.05.0/lib/gmp/mpqf.cmx \
+    /home/gg/.opam/4.05.0/lib/gmp/mpq.cmx \
+    /home/gg/.opam/4.05.0/lib/gmp/mpfrf.cmx libs/itv_sig.cmx libs/itv.cmx \
+    libs/bound_sig.cmx libs/bot.cmx libs/abstract_sig.cmx
+libs/abstract_box.cmx : frontend/syntax.cmx \
+    /home/gg/.opam/4.05.0/lib/zarith/q.cmi libs/mapext.cmx libs/itv_sig.cmx \
+    libs/itv.cmx libs/bound_sig.cmx libs/bot.cmx libs/abstract_sig.cmx
+libs/abstract_sig.cmx : frontend/syntax.cmx \
+    /home/gg/.opam/4.05.0/lib/zarith/q.cmi libs/itv_sig.cmx \
+    libs/bound_sig.cmx libs/bot.cmx
+libs/bot.cmx : libs/bot.cmi
+libs/bot.cmi :
+libs/bound_float.cmx : /home/gg/.opam/4.05.0/lib/zarith/z.cmi \
+    /home/gg/.opam/4.05.0/lib/zarith/q.cmi
+libs/bound_rational.cmx : /home/gg/.opam/4.05.0/lib/zarith/z.cmi \
+    /home/gg/.opam/4.05.0/lib/zarith/q.cmi
+libs/bound_sig.cmx : /home/gg/.opam/4.05.0/lib/zarith/z.cmi \
+    /home/gg/.opam/4.05.0/lib/zarith/q.cmi
+libs/itv.cmx : /home/gg/.opam/4.05.0/lib/zarith/q.cmi libs/bound_sig.cmx \
+    libs/bound_rational.cmx libs/bound_float.cmx libs/bot.cmx
+libs/itv_sig.cmx : /home/gg/.opam/4.05.0/lib/zarith/q.cmi libs/bound_sig.cmx \
+    libs/bot.cmx
+libs/mapext.cmx : libs/mapext.cmi
+libs/mapext.cmi :
+libs/svg.cmx : frontend/syntax.cmx libs/abstract_sig.cmx
+solver/absinterp.cmx : frontend/syntax.cmx libs/bot.cmx \
+    libs/abstract_sig.cmx
+solver/old_soup.cmx : frontend/syntax.cmx libs/svg.cmx solver/parameters.cmx \
+    libs/bot.cmx libs/abstract_sig.cmx
+solver/parameters.cmx : libs/svg.cmx
+solver/solver.cmx : solver/soup.cmx solver/parameters.cmx \
+    solver/old_soup.cmx frontend/file_parser.cmx libs/abstract_box.cmx \
+    libs/abstract_apron.cmx solver/absinterp.cmx
+solver/soup.cmx : frontend/syntax.cmx libs/svg.cmx \
+    /home/gg/.opam/4.05.0/lib/zarith/q.cmi solver/parameters.cmx \
+    libs/mapext.cmx libs/bot.cmx libs/abstract_sig.cmx

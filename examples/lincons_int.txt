@@ -1,0 +1,26 @@
+/*
+  Linear constraint.
+
+  integer version
+  
+  Author: Antoine Mine
+  Copyright 2015
+*/
+
+
+init {
+  tick%=[0,0];
+  time=[0,0];
+}
+
+body {
+  if (tick% <% 30) {
+    tick% = tick% + 1;
+    time = time + [0.25,0.5];
+  }
+}
+
+goal {
+  tick%=[0,30];
+  time=[0,30];
+}

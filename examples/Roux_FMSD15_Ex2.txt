@@ -1,0 +1,54 @@
+/*
+  An abstract fixpoint solver based on Constraint Programming
+
+  Example file: 
+     Practical policy iterations
+     Roux and Garoche
+     Form Methods Syst Des 2015
+     DOI 10.1007/s10703-015-0230-7
+     Also known as Ex.2 (a filter that uses four program variables)
+  
+  Author: Jason Breck
+  Copyright 2015
+*/
+
+
+init {
+  // True initial conditions from paper:
+  //x0 = [0,0];
+  //x1 = [0,0];
+  //x2 = [0,0];
+  //x3 = [0,0];
+
+  // Adjusted initial conditions to avoid zero-volume initial condition.
+  x0 = [-0.01,0.01];
+  x1 = [-0.01,0.01];
+  x2 = [-0.01,0.01];
+  x3 = [-0.01,0.01];
+}
+
+body {
+  in0 = [-1,1];
+  x0p = x0; x1p = x1; x2p = x2; x3p = x3;
+
+  x0 = 1.5*x0p - 0.7*x1p - 0.7*x2p + 0.4*x3p + 0.5*in0;
+  x1 = x0p;
+  x2 = in0;
+  x3 = x2p;
+
+}
+
+goal {
+  // Rounding to next-wider integer interval
+  x0 = [-2,2];
+  x1 = [-2,2];
+  x2 = [-1,1];
+  x3 = [-1,1];
+
+  // Bounds given in the benchmarks PDF
+  //  https://cavale.enseeiht.fr/practicalpolicy2014/benchmarks.pdf
+  //x0 = [-1.64,1.64];
+  //x1 = [-1.64,1.64];
+  //x2 = [-1,1];
+  //x3 = [-1,1];
+}

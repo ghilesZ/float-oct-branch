@@ -1,0 +1,48 @@
+/*
+  An abstract fixpoint solver based on Constraint Programming
+
+  Example file: 
+     Practical policy iterations
+     Roux and Garoche
+     Form Methods Syst Des 2015
+     DOI 10.1007/s10703-015-0230-7
+     Also known as Ex.3 (Discretized lead-lag controller)
+  
+  NameInPaper: Discretized lead-lag controller (saturate)
+  Author: Jason Breck
+  Copyright 2015
+*/
+
+/*
+ // Code from benchmarks tarball:
+ node top(in0 : real) returns (sx0, x0, x1 : real);
+ let
+   assert(in0 >= -1. and in0 <= 1.);
+   x0 = 0. -> 0.499 * pre sx0 - 0.05 * pre x1 + in0;
+   x1 = 0. -> 0.01 * pre sx0 + pre x1;
+   sx0 = if x0 > 50. then 50. else if x0 < -50. then -50. else x0;
+ tel
+*/
+
+init {
+  // True initial conditions from paper:
+  x0 = [0,0];
+  x1 = [0,0];
+}
+
+body {
+  in0 = [-1,1];
+  x0p = x0; x1p = x1; 
+
+  x0 = 0.499*x0p - 0.05*x1p + in0;
+  x1 = 0.010*x0p +      x1p;
+  
+  if (x0 >  50) { x0 =  50; }
+  if (x0 < -50) { x0 = -50; }
+}
+
+goal {
+  // Bounds given in the Roux paper (Table 3)
+  x0 = [-4.03,4.03];
+  x1 = [-20.41,20.41];
+}

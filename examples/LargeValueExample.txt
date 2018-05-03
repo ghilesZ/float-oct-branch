@@ -1,0 +1,27 @@
+/*
+  An abstract fixpoint solver based on Constraint Programming
+
+  Example file: count by nondeterministic amounts...
+  
+  Author: Jason Breck
+  Copyright 2015
+*/
+
+// TO USE THIS TEMPLATE, REPLACE @M AND @I WITH NUMBERS
+
+init {
+  i%=[0,0];
+  k%=[0,0];
+}
+
+body {
+  if (i% <% @M) {
+    i% = i% + [1,@M];
+    k% = k% + 1;
+  }
+}
+
+goal {
+  k%=[0,@M];
+  i%=[0,@I];
+}

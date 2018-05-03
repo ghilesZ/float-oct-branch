@@ -1,0 +1,35 @@
+/*
+  An abstract fixpoint solver based on Constraint Programming
+
+  Example file from Leopold Haller's benchmark
+  Newton iterations: two steps
+
+  =>
+  works for bound of 0.1
+
+  Author: Antoine Mine
+  Copyright 2015
+*/
+
+
+init {
+  x=[-1,1];
+  out=[0,0];
+}
+
+body {
+  y = x - x*x*x/6 + x*x*x*x*x/120 + x*x*x*x*x*x*x/5040;
+  z = 1 - x*x/2 + x*x*x*x/24 + x*x*x*x*x*x/720;
+  x = x - y / z;
+
+  y = x - x*x*x/6 + x*x*x*x*x/120 + x*x*x*x*x*x*x/5040;
+  z = 1 - x*x/2 + x*x*x*x/24 + x*x*x*x*x*x/720;
+  x = x - y / z;
+
+  out = x;
+}
+
+goal {
+  x=[-1,1];
+  out=[-0.1,0.1];
+}

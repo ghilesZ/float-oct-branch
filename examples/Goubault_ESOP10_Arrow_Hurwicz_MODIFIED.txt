@@ -1,0 +1,68 @@
+/*
+  An abstract fixpoint solver based on Constraint Programming
+
+  Example file: from ESOP'10: Coupling Policy Iteration with
+                  Semi-definite Relaxation to Compute
+                  Accurate Numerical Invariants in Static
+                  Analysis
+                by Adje, Gaubert, and Goubault
+                Arrow-Hurwicz
+
+  NameInPaper: Arrow-Hurwicz
+  see: 
+  
+  ***************************************************************
+  NOTE: This is a *modified* version of the Arrow-Hurwicz example
+        because it does not represent u and v as separate
+        variables, and it has no loop condition.
+  ***************************************************************
+
+  Author: Jason Breck
+  Copyright 2015
+*/
+
+/*
+  // Original code from http://www.lix.polytechnique.fr/~adje/uploads/Codes.pdf
+  a = 1;
+  b = -1;
+  c = -1;
+  r = 1/2;
+  u = [0, 1];
+  v = [0, 1];
+  x = [0, 3/2];
+  y = [3/8, 11/8];
+  while (max(|x-u|, |y-v|) > 1e-9) {
+    u = x;
+    v = y;
+    x = u - r * (a * u + b * v);
+    y = v + (r / 2) * (b * u - c);
+    if (y <= 0) {
+      y = 0;
+    }
+  }
+
+*/
+
+init {
+  x = [0,1.5];
+  y = [0.375,1.375];
+}
+
+body {
+  // Note: We have removed the loop condition, so u and v are temporary variables, 
+  //   not carried from one iteration to the next.
+  //   We have also substituted in constants a,b,c,r
+  u = x;
+  v = y;
+  x = u - 0.5 * (1 * u + (-1) * v);
+  y = v + (0.5 / 2) * ((-1) * u - (-1));
+  if (y <= 0) {
+    y = 0;
+  }
+}
+
+goal {
+  // Note: these bounds are not from the paper, they are simply a reasonable guess.
+  x = [-2,2];
+  y = [-2,2];
+}

@@ -1,0 +1,65 @@
+/*
+  An abstract fixpoint solver based on Constraint Programming
+
+  Example file: 
+     Practical policy iterations
+     Roux and Garoche
+     Form Methods Syst Des 2015
+     DOI 10.1007/s10703-015-0230-7
+     Also known as Ex.8 (Harmonic oscillator)
+
+     ultimately from LMCS '12: ACCURATE NUMERICAL INVARIANTS 
+     by Adje, Gaubert, and Goubault
+     Figure 12: An implementation of the Symplectic method
+  
+  NameInPaper: Harmonic oscillator (saturate)
+  Author: Jason Breck
+  Copyright 2015
+*/
+
+/*
+  // Code from benchmarks tarball
+  node top(ix0, ix1 : real) returns (sx0, x0, x1 : real);
+  let
+    assert(ix0 > 0. and ix0 < 1.);
+    assert(ix1 > 0. and ix1 < 1.);
+    x0 = ix0 -> 0.95 * pre sx0 + 0.09975 * pre x1;
+    x1 = ix1 -> -0.1 * pre sx0 + 0.95 * pre x1;
+    sx0 = if x0 > 0.5 then 0.5 else if x0 < -0.5 then -0.5 else x0;
+  tel
+*/
+
+/*
+  // Original code from the Goubault paper
+  tau = 0.1;
+  x = [0,1];
+  v = [0,1];
+  while (true) {
+    x = (1−( tau / 2 ) ) * x + (tau −(( tau ˆ 3 ) / 4 ) ) * v ;
+    v = −tau *x+(1−( tau / 2 ) )* v ;
+  }
+*/
+
+init {
+  x0=[0,1];
+  x1=[0,1];
+}
+
+body {
+  x0p = x0; x1p = x1;
+
+  x0 =  0.95*x0p + 0.09975*x1p;
+  x1 = -0.1 *x0p + 0.95   *x1p;
+  
+  if (x0 >  0.5) { x0 =  0.5; }
+  if (x0 < -0.5) { x0 = -0.5; }
+}
+
+goal {
+  // Bounds given in the Roux paper (Table 3)
+  x0=[-1.27,1.27];
+  x1=[-1.27,1.27];
+  // Goal from ESOP'10 paper (policy iteration goal)
+  //x=[-1.42,1.42];
+  //v=[-1.42,1.42];
+}

@@ -1,0 +1,30 @@
+/*
+  Non-linear constraint.
+
+  Similar to the linear case, but with an exponential ramp
+  instead.
+
+  Works with boxes, but not octagons.
+  Works with boxes for tick bound (e.g., 30).
+  Works with various increment range for time.
+
+  Author: Antoine Mine
+  Copyright 2015
+*/
+
+init {
+  tick=[0,0];
+  time=[0,1];
+}
+
+body {
+  if (tick < 30) {
+    tick = tick + 1;
+    time = time * [1,1.1];
+  }
+}
+
+goal {
+  tick=[0,30];
+  time=[0,30];
+}

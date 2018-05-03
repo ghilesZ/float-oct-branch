@@ -1,0 +1,60 @@
+/*
+  An abstract fixpoint solver based on Constraint Programming
+
+  Example file: 
+     Practical policy iterations
+     Roux and Garoche
+     Form Methods Syst Des 2015
+     DOI 10.1007/s10703-015-0230-7
+     Ex. 1 (Filter)
+
+     ultimately from LMCS '12: ACCURATE NUMERICAL INVARIANTS 
+     by Adje, Gaubert, and Goubault
+     Figure 11: The program Filter
+  
+  NameInPaper: Filter
+  Author: Jason Breck
+  Copyright 2015
+*/
+
+/*
+  // Code from the Roux paper:
+  node top(in0 : real) returns (x, y : real);
+  let
+    assert(in0 >= -1. and in0 <= 1.);
+    x = 0. -> 1.5 * pre x - 0.7 * pre y + 1.6 * in0;
+    y = 0. -> pre x;
+  tel
+*/
+
+/*
+  // Code from the Adje paper:
+  x = [0,1];
+  y = [0,1]; 
+  while ( true ) {
+    x = ( 3 / 4 )* x−(1/8)*y;
+    y = x;
+  }
+*/
+
+init {
+  x=[0,0];
+  y=[0,0];
+}
+
+body {
+  prex = x;
+  in0 = [-1,1];
+  x = 1.5 * x - 0.7 * y + 1.6 * in0;
+  y = prex;
+}
+
+goal {
+  // A wider goal designed to be easier for CPSolver to prove:
+  // (indeed, CPSolver can prove this goal pretty easily)
+  x=[-24,24];
+  y=[-24,24];
+  // Goal taken from FMSD'15 paper.
+  //x=[-16,16];
+  //y=[-16,16];
+}

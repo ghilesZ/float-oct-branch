@@ -1,0 +1,38 @@
+/*
+  An abstract fixpoint solver based on Constraint Programming
+
+  Example file: from LMCS '12: ACCURATE NUMERICAL INVARIANTS 
+                by Adje, Gaubert, and Goubault
+                Figure 11: The program Filter
+  
+  NameInPaper: Filter
+  Author: Jason Breck
+  Copyright 2015
+*/
+
+/*
+  // Code from the paper:
+  x = [ 0 , 1 ] ;
+  y = [ 0 , 1 ] ; 
+  while ( true ) {
+    x = ( 3 / 4 )* x−(1/8)*y ;
+    y = x ; 
+  }
+*/
+
+init {
+  x=[0,1];
+  y=[0,1];
+}
+
+body {
+  x = (3.0/4.0) * x - (1.0/8.0)* y;
+  y = x;
+}
+
+goal {
+  // This goal was not taken from the paper itself, but was chosen
+  //   as a reasonable property to prove.
+  x=[-0.2,1];
+  y=[-0.2,1];
+}

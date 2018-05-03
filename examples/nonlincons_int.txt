@@ -1,0 +1,28 @@
+/*
+  Non-linear constraint.
+
+  'tick' is now integer
+
+  works better with a large epsilon_size
+  --epsilon-size 100000
+
+  Author: Antoine Mine
+  Copyright 2015
+*/
+
+init {
+  tick%=[0,0];
+  time=[0,1];
+}
+
+body {
+  if (tick% <% 100) {
+    tick% = tick% + 1;
+    time = time * [1,1.01];
+  }
+}
+
+goal {
+  tick%=[0,100];
+  time=[0,1000];
+}

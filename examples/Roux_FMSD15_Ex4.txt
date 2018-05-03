@@ -1,0 +1,53 @@
+/*
+  An abstract fixpoint solver based on Constraint Programming
+
+  Example file: 
+     Practical policy iterations
+     Roux and Garoche
+     Form Methods Syst Des 2015
+     DOI 10.1007/s10703-015-0230-7
+     Figure 1 "Example of a control-command program"
+     Also known as Ex.4
+  
+  Author: Jason Breck
+  Copyright 2015
+*/
+
+
+init {
+  // True initial conditions from paper:
+  //x0 = [0,0];
+  //x1 = [0,0];
+  //x2 = [0,0];
+
+  // Adjusted initial conditions to avoid zero-volume initial condition.
+  x0 = [-0.01,0.01];
+  x1 = [-0.01,0.01];
+  x2 = [-0.01,0.01];
+}
+
+body {
+  in  = [-1,1];
+  x0p = x0; x1p = x1; x2p = x2;
+
+  x0 =  0.9379*x0p - 0.03810*x1p - 0.0414*x2p + 0.0237*in;
+  x1 = -0.0404*x0p + 0.96800*x1p - 0.0179*x2p + 0.0143*in;
+  x2 =  0.0142*x0p - 0.01970*x1p + 0.9823*x2p + 0.0077*in;
+
+}
+
+goal {
+x0=[-1,1];
+x1=[-1,1];
+x2=[-1,1];
+
+  // Rounding to next-wider interval, to 1-decimal place
+//  x0 = [-0.5,0.5];
+//  x1 = [-0.4,0.4];
+//  x2 = [-0.6,0.6];
+
+  // Bounds given in the paper
+  //x0 = [-0.4236,0.4236];
+  //x1 = [-0.3371,0.3371];
+  //x2 = [-0.5251,0.5251];
+}

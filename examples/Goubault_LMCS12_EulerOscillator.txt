@@ -1,0 +1,41 @@
+/*
+  An abstract fixpoint solver based on Constraint Programming
+
+  Example file: from LMCS '12: ACCURATE NUMERICAL INVARIANTS 
+                by Adje, Gaubert, and Goubault
+                Figure 8: The program Oscillator
+  
+  Author: Jason Breck
+  Copyright 2015
+*/
+
+/*
+// Code from the paper:
+  x = [0,1] ;
+  v = [0,1] ;
+  h = 0 . 0 1 ;
+  while ( true ) {
+    u = v; 
+    v = v*(1-h)-h*x;
+    x = x+h*u;
+  }
+*/
+
+init {
+  x=[0,1];
+  v=[0,1];
+}
+
+body {
+  // setting h = 0.01
+  u = v; 
+  v = v*(1 - 0.01) - 0.01 * x;
+  x = x + 0.01 * u;
+}
+
+goal {
+  // This goal was not taken from the paper itself, but was chosen
+  //   as a reasonable property to prove.
+  x=[-5,5];
+  v=[-5,5];
+}

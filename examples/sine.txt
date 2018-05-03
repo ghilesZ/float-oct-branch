@@ -1,0 +1,32 @@
+/*
+  An abstract fixpoint solver based on Constraint Programming
+
+  Example file from Leopold Haller's benchmark
+  Simple Taylor expansion of sine, no loop
+
+  =>
+  can prove a bound of 1.1 for the output
+  does not work for tighter bounds
+
+  the vertical bar for out=0 is expected (the inductive invariant must
+  include both the init state, where out=0, and the end state, where
+  out is the approximate sine)
+
+  Author: Antoine Mine
+  Copyright 2015
+*/
+
+
+init {
+  x = [-1.57079632679,1.57079632679];
+  out=[0,0];
+}
+
+body {
+  out = x - x*x*x/6 + x*x*x*x*x/120 - x*x*x*x*x*x*x/5040;
+}
+
+goal {
+  x=[-2,2];
+  out=[-1.1,1.1];
+}

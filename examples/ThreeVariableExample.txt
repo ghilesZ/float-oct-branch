@@ -1,0 +1,41 @@
+/*
+  An abstract fixpoint solver based on Constraint Programming
+
+  Example file: three-dimensional version of octagon example
+  
+  Author: Jason Breck
+  Copyright 2014
+*/
+
+
+init {
+  x=[-1,1];
+  y=[-1,1];
+  z=[-1,1];
+}
+
+body {
+  // I've replaced the coefficient here, which was 0.7,
+  //   with 0.53, in an attempt to make the program easier
+  //   for CPSolver to analyze; this effectively increases
+  //   the amount of inward scaling that happens with each
+  //   rotation, which should allow the invariant shape 
+  //   (it was an octagon in 2d, but now it's 3d) to be 
+  //   approximated more coarsely.  Or so I hope.
+  if ([0,1] > 0.5) {
+    t=0.53*(x+y);
+    y=0.53*(x-y);
+    x=t;
+  } else {
+    t=0.53*(x+z);
+    z=0.53*(x-z);
+    x=t;
+  }
+}
+
+goal {
+  x=[-2,2];
+  y=[-2,2];
+  z=[-2,2];
+}
+

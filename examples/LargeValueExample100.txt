@@ -1,0 +1,25 @@
+/*
+  An abstract fixpoint solver based on Constraint Programming
+
+  Example file: count by nondeterministic amounts...
+  
+  Author: Jason Breck
+  Copyright 2015
+*/
+
+init {
+  i%=[0,0];
+  k%=[0,0];
+}
+
+body {
+  if (i% <% 100) {
+    i% = i% + [1,100];
+    k% = k% + 1;
+  }
+}
+
+goal {
+  k%=[0,100];
+  i%=[0,300];
+}

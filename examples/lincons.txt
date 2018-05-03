@@ -1,0 +1,35 @@
+/*
+  Linear constraint.
+
+  The linear slope is chosen so that it canbot be represented
+  exactly in the box or octagon domain.
+
+  Works with boxes for tick bound (e.g., 30).
+  Works with various increment range for time.
+  Larger bounds require more --max-refinement-steps
+  Does not work with octagons.
+
+  A main issue is that the values of tick are discrete but the solver
+  is for continuous domains only.
+
+  Author: Antoine Mine
+  Copyright 2015
+*/
+
+
+init {
+  tick=[0,0];
+  time=[0,0];
+}
+
+body {
+  if (tick < 30) {
+    tick = tick + 1;
+    time = time + [0.25,0.5];
+  }
+}
+
+goal {
+  tick=[0,30];
+  time=[0,30];
+}

@@ -1,0 +1,27 @@
+/*
+  An abstract fixpoint solver based on Constraint Programming
+
+  Example file.
+  
+  Author: Antoine Mine
+  Copyright 2014
+*/
+
+
+init {
+  x=[-0.1,0.1];
+  y=[-0.1,0.1];
+}
+
+body {
+  d = (0.15 + x*x + y*y)/2;
+  if (d>0.1) {
+    x = x / d; 
+    y = y / d; 
+  }
+}
+
+goal {
+  x=[-2,2];
+  y=[-2,2];
+}

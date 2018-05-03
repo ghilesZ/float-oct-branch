@@ -1,0 +1,40 @@
+/*
+  Logistic map.
+
+  The logistic map x_n+1 <- r * x_n * (1-x_n).
+  x_n is the population, in [0,1].
+  r is the (constant parameter).
+
+  The behavior varies widely for different values of r:
+  - [0;1] -> x_n tends towards 0
+  - [1;2] -> x_n tends towards (r-1)/r
+  - [2;3] -> x_n fluctutates around then tends towards (r-1)/r
+  - [3;3.57] -> x_n has oscillations among more and more values
+  - [3.57,4] -> the behavior is chaotic
+ 
+  Here, we want to prove that, for certain values of r, the
+  population always stays between some bounds [0.1,0.9].
+  (This is stronger than looking only at the stable values).
+
+  We choose r in [1.5,3.568], so that the population does not go
+  towards 0, and we are before the chaotic behaviors
+
+  This works well for boxes and octagons.
+
+  Author: Antoine Mine
+  Copyright 2015
+*/
+
+init {
+  x=[0.1,0.9];
+  r=[1.5,3.568];
+}
+
+body {
+  x = r * x * (1-x);
+}
+
+goal {
+  x=[0.1,0.9];
+  r=[1.5,3.568];
+}
