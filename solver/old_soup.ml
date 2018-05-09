@@ -1,13 +1,13 @@
 (*
   An abstract fixpoint solver based on Constraint Programming
-  
+
   Author: Antoine Mine
   Copyright 2015
 *)
 
 (*
   A soup is a set of boxes which is a candidate inductive invariant.
-  
+
   We maintain extra information with each box to allow fast computation
   of coverage and abstract operations (tightening, split, etc.)
  *)
@@ -17,18 +17,18 @@ open Bot
 open Syntax
 open Abstract_sig
 open Parameters
-
+open Mystdlib
 
 
 (* Functor *)
 (* ******* *)
-    
+
 module Soup(A:ABSTRACT) = struct
-  
+
   module I = A.I
   module B = I.B
   module Svg = Svg.SVG(A)
-    
+
 
   (************************************************************************)
   (* TYPES *)
@@ -44,7 +44,7 @@ module Soup(A:ABSTRACT) = struct
   (* a soup element is a box, with extra information;
      elements are immutable
    *)
-  type elem = 
+  type elem =
       { id: id;         (* unique identifier *)
         box: box;       (* geometrical interpretation *)
         image: box;     (* image of box by f *)
@@ -59,38 +59,38 @@ module Soup(A:ABSTRACT) = struct
     - to allow old elements to be cut from time to time
       - to distinguish elements with identical weight
    *)
-  module FSet = Set.Make 
-      (struct 
-        type t = B.t * id 
+  module FSet = Set.Make
+      (struct
+        type t = B.t * id
         let w x i = B.add_up x (B.div_up (B.of_int_up i) (B.of_int_down 10000))
-        let compare (x,i) (y,j) = 
+        let compare (x,i) (y,j) =
         let x = B.compare (w x i) (w y j) in
         if x <> 0 then x else compare i j
       end)
-      
+
 
   (* soup;
      the soup is mutable, it corresponds to the current state of the solver
      and it is updated by solver operations
    *)
   type soup =
-      { 
+      {
         (* the function whose fixpoint we are computing *)
-        f: (box -> box); 
-        
+        f: (box -> box);
+
         (* initial states, the fixpoint will include this box *)
         init: box;
-        
+
         (* goal invariant *)
         goal: box;
-        
+
         (* all the elements in the soup *)
         elems: (id,elem) Hashtbl.t;
-        
+
         (* the element, sorted by the prefered order of refinement *)
         (* elements with coverage 1 are not present here *)
         mutable covers: FSet.t;
-        
+
         (* graphical output *)
         out: Svg.svg;
         mutable time: Svg.time;
@@ -110,11 +110,11 @@ module Soup(A:ABSTRACT) = struct
          (fun acc id' ->
            let e' = Hashtbl.find soup.elems id' in
            B.add_up acc (A.overlap image e'.box)
-         ) 
+         )
          B.zero post
       )
       (A.volume image)
-    
+
 
 
 
@@ -148,28 +148,21 @@ module Soup(A:ABSTRACT) = struct
         assert (B.equal cover e.cover)
       ) soup.covers
 
-
-
   (* creates new identifiers *)
-  let new_id : unit -> id =
-    let id = ref 0 in
-    fun () -> incr id; assert (!id > 0); !id
-        
+  let new_id : unit -> id = counter 0
 
-  let rec print_int_list c = function
-    | [] -> Printf.fprintf c "()"
-    | [a] -> Printf.fprintf c "%i" a
-    | a::l -> Printf.fprintf c "%i,%a" a print_int_list l
+  let print_int_list fmt = function
+    | [] -> Format.fprintf fmt "()"
+    | x  -> Format.(pp_print_list ~pp_sep:comma_sep pp_print_int fmt x)
 
   let print_int_list_length c l =
-    Printf.printf "%i" (List.length l)
-      
-      
+    Format.printf "%i" (List.length l)
+
   (* prints element (for debugging) *)
   let print_elem c e =
-    Printf.fprintf c "%i: %a, image %a cover %f, pre %a, post %a%s" 
-      e.id A.output e.box A.output e.image (B.to_float_up e.cover) 
-      print_int_list_length e.pre print_int_list_length e.post 
+    Printf.fprintf c "%i: %a, image %a cover %f, pre %a, post %a%s"
+      e.id A.output e.box A.output e.image (B.to_float_up e.cover)
+      print_int_list_length e.pre print_int_list_length e.post
       (if e.initial then ", initial" else "")
 
 
@@ -180,12 +173,12 @@ module Soup(A:ABSTRACT) = struct
 
 
   (* create a new soup composed of a single box (the goal) *)
-  let create_soup 
-      (f:box -> box) 
-      (init:box) (goal:box) : soup = 
-    
+  let create_soup
+      (f:box -> box)
+      (init:box) (goal:box) : soup =
+
     (* setup output *)
-    let x,y = 
+    let x,y =
       if not (!svg_result || !svg_steps || !svg_animation) then "", "" else
       if !svg_x <> "" && !svg_y <> "" then !svg_x, !svg_y else
       match A.get_variables init with
@@ -199,13 +192,13 @@ module Soup(A:ABSTRACT) = struct
     let img = f goal in
     let cover = B.div_up (A.overlap goal img) (A.volume img) in
     assert (B.sign cover > 0);
-    let elem = 
+    let elem =
       { id = id; box = goal; image = img; cover = cover; initial = true;
         post = [id]; pre = [id];
-      } 
+      }
     in
-    let soup = 
-      { elems = Hashtbl.create 10; 
+    let soup =
+      { elems = Hashtbl.create 10;
         covers = FSet.singleton (cover,id);
         goal; init; f;
         out; time=0;
@@ -215,7 +208,7 @@ module Soup(A:ABSTRACT) = struct
     Svg.add_elem soup.out id soup.time elem.box (Svg.Elem (B.to_float_down elem.cover));
     if !do_validate_final then validate soup;
     soup
-      
+
 
   (* removes the element from the queue, but keep it in the soup *)
   let lock_elem (soup:soup) (id:id) : unit =
@@ -262,7 +255,7 @@ module Soup(A:ABSTRACT) = struct
     assert (Hashtbl.mem soup.elems id);
     let e = Hashtbl.find soup.elems id in
     (* join with intersections with image of pre *)
-    let b = 
+    let b =
       List.fold_left
         (fun cur id'' ->
           let e'' = Hashtbl.find soup.elems id'' in
@@ -279,11 +272,11 @@ module Soup(A:ABSTRACT) = struct
     | Nb b ->
         if A.equal e.box b then () (* no update *) else
         (* update element *)
-        let e' = 
+        let e' =
           { e with
-            box = b; 
+            box = b;
             image = soup.f b;
-            initial = A.intersect b soup.init; 
+            initial = A.intersect b soup.init;
           }
         in
         Hashtbl.replace soup.elems id e';
@@ -302,7 +295,7 @@ module Soup(A:ABSTRACT) = struct
         if B.lt e'.cover B.one
         then soup.covers <- FSet.add (e'.cover,id) soup.covers;
         (* update post of other elements *)
-        List.iter 
+        List.iter
           (fun id'' ->
             if not (List.exists ((=) id'') post) then
               let e'' = Hashtbl.find soup.elems id'' in
@@ -310,12 +303,12 @@ module Soup(A:ABSTRACT) = struct
               Hashtbl.replace soup.elems id'' { e'' with pre = pre; }
           )
           e.post;
-        if !verbose_log then 
+        if !verbose_log then
           Printf.printf "  shrink %a -> %a\n" print_elem e print_elem e';
         if !do_validate_step then validate soup
     | _ ->
         remove_elem soup id
-          
+
 
 
   (* split the element id in the soup;
@@ -332,12 +325,12 @@ module Soup(A:ABSTRACT) = struct
     else match A.split e.box var (I.mean range) with
     | Nb b1, Nb b2 ->
         (* succesful split *)
-        let dup b = 
-          { e with 
-            id = new_id(); 
-            box = b; 
+        let dup b =
+          { e with
+            id = new_id();
+            box = b;
             image = soup.f b;
-            initial = A.intersect b soup.init; 
+            initial = A.intersect b soup.init;
           } in
         let e1,e2 = dup b1, dup b2 in
         Hashtbl.remove soup.elems id;
@@ -345,7 +338,7 @@ module Soup(A:ABSTRACT) = struct
         Hashtbl.add soup.elems e1.id e1;
         Hashtbl.add soup.elems e2.id e2;
         (* replace occurences of id with that of new elems *)
-        let updt l = 
+        let updt l =
           if List.exists ((=) id) l then [e1.id;e2.id]@(List.filter ((<>) id) l)
           else l
         in
@@ -353,7 +346,7 @@ module Soup(A:ABSTRACT) = struct
         (* new post and pre are subsets of the old ones *)
         let post e =
           List.filter
-            (fun id' -> 
+            (fun id' ->
               let e' = Hashtbl.find soup.elems id' in
               A.intersect e.image e'.box
             ) (updt e.post)
@@ -408,9 +401,10 @@ module Soup(A:ABSTRACT) = struct
   (************************************************************************)
 
 
-  let solve 
-      (f:box -> box) 
-      (init:box) (goal:box) : unit =
+  let solve
+        (fwd:box -> box)
+        (bwd:box -> box)
+        (init:box) (goal:box) : unit =
 
     let epsilon_size = B.div_up (B.of_float_up !epsilon_size) (A.volume init)
     and epsilon_cover = B.of_float_up !epsilon_cover
@@ -419,67 +413,67 @@ module Soup(A:ABSTRACT) = struct
     Printf.printf "init: %a\ngoal: %a\n%!" A.output init A.output goal;
 
     (* create the initial soup *)
-    let soup = create_soup f init goal in
-    
+    let soup = create_soup fwd init goal in
+
     (* iteration loop *)
-    let rec iterate i = 
+    let rec iterate i =
 
       soup.time <- i;
-      if i > !max_iterate then 
+      if i > !max_iterate then
         (* exit due to maximal iteration count reached *)
         Printf.printf "maximum iteration reached\n"
-          
-      else if FSet.is_empty soup.covers then 
+
+      else if FSet.is_empty soup.covers then
         (* exit as nothing more to do *)
         Printf.printf "%i iteration\n" i
-          
+
       else
         (* find the element to handle *)
         let cover,id = FSet.min_elt soup.covers in
         let e = Hashtbl.find soup.elems id in
-        if !verbose_log then 
-          Printf.printf "iteration %i, %i elem(s), select %a" 
+        if !verbose_log then
+          Printf.printf "iteration %i, %i elem(s), select %a"
             i (FSet.cardinal soup.covers) print_elem e;
-        
+
         (* handle the element *)
         let small = B.leq (A.size e.box) epsilon_size in
         if (B.leq cover epsilon_cover || small || e.pre = []) && not e.initial then (
           (* (too small or not enough covered) and not initial => remove *)
-          if !verbose_log then Printf.printf " => removed\n%!"; 
+          if !verbose_log then Printf.printf " => removed\n%!";
           remove_elem soup id
          )
         else if small then (
           (* too small but initial => keep intact *)
-          if !verbose_log then Printf.printf " => kept\n%!"; 
+          if !verbose_log then Printf.printf " => kept\n%!";
           lock_elem soup id
          )
         else (
           (* not too small, good enough coverage => split *)
-          if !verbose_log then Printf.printf " => split\n%!"; 
+          if !verbose_log then Printf.printf " => split\n%!";
           split_elem soup id
          );
-        
-        let m = 
-          if i <= 10 then 1 
+
+        let m =
+          if i <= 10 then 1
           else if i <= 100 then 10
           else if i <= 1000 then 100
-          else if i <= 100000 then 1000
+          else if i <= 1000 then 1000
           else 10000
         in
         if !svg_steps && i mod m = 0 then
           Svg.save_image (Printf.sprintf "%s%010i.svg" !svg_prefix i) soup.out;
-        
+
         (* next iteration *)
         iterate (i+1)
-    in 
-    
+    in
+
     (* launch iterations *)
     iterate 1;
     if !svg_result then
       Svg.save_image (Printf.sprintf "%sresult.svg" !svg_prefix) soup.out;
     if !svg_animation then
       Svg.save_animation (Printf.sprintf "%sanimation.svg" !svg_prefix) soup.out;
-    
+
     (* check result *)
     let noncovered, covered =
       Hashtbl.fold
@@ -491,5 +485,6 @@ module Soup(A:ABSTRACT) = struct
     if noncovered = 0 then Printf.printf "INDUCTIVE INVARIANT FOUND\n%!"
     else Printf.printf "FAILED\n%!";
     if !do_validate_final then validate soup
+
 
 end

@@ -38,17 +38,17 @@ module S4 = Soup.Soup(A4)
 let do_work filename =
   let p = File_parser.parse filename in
   if !legacy_mode then
-    let init,goal,body = I1.prog p in
-    S1.solve body init goal
+    let init,goal,body,bwd_body = I1.prog p in
+    S1.solve body bwd_body init goal
   else if !octagon_mode then
-    let init,goal,body = I3.prog p in
-    S3.solve body init goal
+    let init,goal,body,bwd_body = I3.prog p in
+    S3.solve body bwd_body init goal
   else if !rational_mode then
-    let init,goal,body = I4.prog p in
-    S4.solve body init goal
+    let init,goal,body,bwd_body = I4.prog p in
+    S4.solve body bwd_body init goal
   else
-    let init,goal,body = I2.prog p in
-    S2.solve body init goal
+    let init,goal,body,bwd_body = I2.prog p in
+    S2.solve body bwd_body init goal
 
 
 (* process command-line arguments *)

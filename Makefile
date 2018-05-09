@@ -35,8 +35,8 @@ endif
 ###############
 
 OCAMLDIR = `$(OCAMLC) -where`
-OCAMLFLAGS = -g
-OCAMLOPTFLAGS =
+OCAMLFLAGS = -g -bin-annot
+OCAMLOPTFLAGS = -bin-annot
 OCAMLINC = -I libs -I frontend -I solver -I $(ZARITHDIR) -I $(APRONDIR) -I $(GMPDIR) -I $(CAMLIDLDIR)
 OCAMLLIBS = bigarray.cma gmp.cma apron.cma octD.cma polkaMPQ.cma zarith.cma str.cma unix.cma -cclib "-L$(ZARITHDIR) -L$(APRONDIR) -L$(GMPDIR) -L$(CAMLIDLDIR)"
 OCAMLOPTLIBS = bigarray.cmxa gmp.cmxa apron.cmxa octD.cmxa polkaMPQ.cmxa zarith.cmxa str.cmxa unix.cmxa -cclib "-L$(ZARITHDIR) -L$(APRONDIR) -L$(GMPDIR) -L$(CAMLIDLDIR)"
@@ -74,6 +74,7 @@ MLFILES = \
   frontend/parser.ml \
   frontend/lexer.ml \
   frontend/file_parser.ml \
+	libs/mystdlib.ml \
   libs/mapext.ml \
   libs/bot.ml \
   libs/bound_sig.ml \

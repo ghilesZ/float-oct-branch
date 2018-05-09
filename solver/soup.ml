@@ -744,8 +744,10 @@ module Soup(A:ABSTRACT) = struct
   (* ****** *)
 
   let solve
-      (f:abs -> abs list)
-      (init:abs) (universe:abs) : unit =
+        (fwd:abs -> abs list)
+        (bwd:abs list -> abs)
+        (init:abs)
+        (universe:abs) : unit =
 
     let epsilon_size = ref (B.div_down (B.of_float_down !epsilon_size) (A.size init))
     and epsilon_cover = ref !epsilon_cover in
@@ -753,27 +755,23 @@ module Soup(A:ABSTRACT) = struct
     Printf.printf "init: %a\nuniverse: %a\n%!" A.output init A.output universe;
 
     (* create the initial soup *)
-    let soup = create f init universe in
+    let soup = create fwd init universe in
 
     (* iteration loop *)
     let rec iterate step i =
-
       soup.step <- soup.step + 1;
       if i > !max_iterate then
         (* exit due to maximal iteration count reached *)
         Printf.printf "  maximum iteration reached\n"
-
       else if pqueue_is_empty soup then
         (* exit as nothing more to do *)
         Printf.printf "  %i iteration(s)\n" i
-
       else
         (* find the element to handle *)
         let elem = pqueue_pick soup in
         if !verbose_log then
           Printf.printf "iteration %i, %i elem(s), select %a"
-            i ((pqueue_size soup) + 1) (print_elem soup) elem;
-
+                        i ((pqueue_size soup) + 1) (print_elem soup) elem;
         (* handle the element *)
         let small = B.lt (A.size elem.abs) !epsilon_size in
         let uncovered = elem.coverage <= !epsilon_cover in
@@ -781,18 +779,18 @@ module Soup(A:ABSTRACT) = struct
         let useless = IdSet.is_empty elem.part.covers in
         if !verbose_log then
           Printf.printf " small=%B uncovered=%B initial=%B useless=%B"
-            small uncovered initial useless;
+                        small uncovered initial useless;
         if (uncovered || small || useless) && not initial then (
           (* (too small or not enough covered) and not initial => remove *)
           if !verbose_log then Printf.printf " => removed\n%!";
           if !aggressive_tightening then remove_and_tighten soup elem
           else remove soup elem
-         )
+        )
         else if small then (
           (* too small but initial => keep intact *)
           if !verbose_log then Printf.printf " => kept\n%!";
           elem.locked <- true
-         )
+        )
         else (
           (* not too small, good enough coverage => split *)
           if !verbose_log then Printf.printf " => split\n%!";
@@ -803,7 +801,7 @@ module Soup(A:ABSTRACT) = struct
           if i <= 10 then 1
           else if i <= 100 then 10
           else if i <= 1000 then 100
-          else if i <= 100000 then 1000
+          else if i <= 10000 then 1000
           else 10000
         in
         if !svg_steps && i mod m = 0 then

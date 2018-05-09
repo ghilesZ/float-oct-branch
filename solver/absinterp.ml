@@ -65,10 +65,14 @@ module Interpreter(A:ABSTRACT) = struct
     | Assign(v,e) -> A.bwd_assign a v e
     | If (b,s1,s2) -> failwith "bwd_interp, not impemented with If constructor"
 
+  let rec bwd_bexpr ((at,af):t bot * t bot)  (e:bexpr) : t bot =
+    match e with
+    | _ -> failwith "bwd_bexpr, not impemented"
+
   (* abstract program:
      - an abstract element for init and one for goal
      - an abstract transfer function for the body *)
-  let prog (p:prog) : t * t * (t -> t) =
+  let prog (p:prog) : t * t * (t -> t) * (t -> t) =
     let debot msg x = match x with
     | Nb y -> y
     | Bot -> failwith ("unexpected bottom in "^msg)
@@ -80,8 +84,12 @@ module Interpreter(A:ABSTRACT) = struct
       let r = debot "body" (interp (Nb x) p.body) in
       (* remove added variables that are not in the argument *)
       fst (A.unify_meet r x)
-    )
-
+    ),
+    (fun x ->
+      (* apply loop antecedent computation *)
+      let r = (bwd_interp x p.body) in
+      (* remove added variables that are not in the argument *)
+      fst (A.unify_meet r x))
 end
 
 
@@ -143,7 +151,7 @@ module PSInterpreter(A:ABSTRACT) = struct
       a, a
 
   (* abstract program *)
-  let prog (p:prog) : t * t * (t -> t list) =
+  let prog (p:prog) : t * t * (t -> t list) * (t list -> t) =
     let debot msg x = match x with
     | Nb y -> y
     | Bot -> failwith ("unexpected bottom in "^msg)
@@ -155,6 +163,7 @@ module PSInterpreter(A:ABSTRACT) = struct
       let rs = interp [x] p.body in
       (* remove added variables that are not in the argument *)
       List.map (fun r -> fst (A.unify_meet r x)) rs
-    )
+    ),
+    (fun xlist  -> failwith "niy")
 
 end
