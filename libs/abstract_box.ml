@@ -49,14 +49,13 @@ module Box(I:ITV) = (struct
 
 
   (* maps from variables *)
-  module Env = Mapext.Make(struct type t=var let compare=compare end)
+  module Env = Mapext.SMap
 
   (* maps each variable to a (non-empty) interval *)
   type t = i Env.t
 
   (* boxes split along variables *)
   type dir = var
-
 
 
   (************************************************************************)

@@ -5,3 +5,4 @@ B frontend
 S libs
 B libs
 PKG apron
+PKG zarith

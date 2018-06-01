@@ -18,24 +18,10 @@ open Bot
 open Syntax
 open Abstract_sig
 open Parameters
-
-
-(* unique identifier management *)
-
-module Id = struct
-  type t = int
-  let next = ref 0
-  let get () = incr next; !next
-  let compare (a:t) (b:t) = compare a b
-  let equal (a:t) (b:t) = a=b
-  let hash (a:t) = a
-end
+open Mapext
 
 module IdHash = Hashtbl.Make(Id)
 module IdSet  = Set.Make(Id)
-module IdMap  = Mapext.Make(Id)
-
-
 
 (* main functor *)
 
@@ -94,7 +80,6 @@ module Soup(A:ABSTRACT) = struct
 
   (* priority queue *)
 
-  module FMap = Mapext.Make(struct type t=float let compare=compare end)
   type pqueue = IdSet.t FMap.t
 
 

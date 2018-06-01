@@ -75,6 +75,7 @@ MLFILES = \
   frontend/lexer.ml \
   frontend/file_parser.ml \
 	libs/mystdlib.ml \
+	libs/id.ml \
   libs/mapext.ml \
   libs/bot.ml \
   libs/bound_sig.ml \
