@@ -341,15 +341,15 @@ module Box(I:ITV) = (struct
   let test (a:t) (e1:expr) (o:cmpop) (e2:expr) : t bot =
     let (b1,i1), (b2,i2) = eval a e1, eval a e2 in
     let j = match o with
-    | EQ | EQ_INT -> I.filter_eq i1 i2
-    | LEQ | LEQ_INT -> I.filter_leq i1 i2
-    | GEQ | GEQ_INT -> I.filter_geq i1 i2
-    | NEQ -> I.filter_neq i1 i2
-    | NEQ_INT -> I.filter_neq_int i1 i2
-    | GT -> I.filter_gt i1 i2
-    | GT_INT -> I.filter_gt_int i1 i2
-    | LT -> I.filter_lt i1 i2
-    | LT_INT -> I.filter_lt_int i1 i2
+      | EQ | EQ_INT -> I.filter_eq i1 i2
+      | LEQ | LEQ_INT -> I.filter_leq i1 i2
+      | GEQ | GEQ_INT -> I.filter_geq i1 i2
+      | NEQ -> I.filter_neq i1 i2
+      | NEQ_INT -> I.filter_neq_int i1 i2
+      | GT -> I.filter_gt i1 i2
+      | GT_INT -> I.filter_gt_int i1 i2
+      | LT -> I.filter_lt i1 i2
+      | LT_INT -> I.filter_lt_int i1 i2
     in
     rebot
       (fun a ->

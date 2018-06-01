@@ -115,15 +115,15 @@ module Soup(A:ABSTRACT) = struct
       first := false
     in
     Printf.fprintf ch "%i: %a, in %a, img={"
-                   elem.part.pid A.output elem.abs A.output elem.part.space;
+      elem.part.pid A.output elem.abs A.output elem.part.space;
     IdSet.iter print_img elem.post;
     let initial = A.intersect elem.abs soup.init in
     Printf.fprintf ch "}, coverage=%f%s, covers=%i, size=%f%s%s"
-                   elem.coverage (if elem.covered then "(covered)" else "")
-                   (IdSet.cardinal elem.part.covers)
-                   (B.to_float_up (A.size elem.abs))
-                   (if initial then " initial" else "")
-                   (if elem.locked then " locked" else "")
+      elem.coverage (if elem.covered then "(covered)" else "")
+      (IdSet.cardinal elem.part.covers)
+      (B.to_float_up (A.size elem.abs))
+      (if initial then " initial" else "")
+      (if elem.locked then " locked" else "")
 
 
   (* raw dump (for debugging) *)
