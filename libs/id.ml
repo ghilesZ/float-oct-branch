@@ -1,13 +1,13 @@
+open Mystdlib
+
 (* unique identifier management *)
 
 type t = int
 
-let get =
-  let next = ref 0 in
-  fun () -> incr next; !next
+let get = counter 1
 
-let compare (a:t) (b:t) = compare a b
+let compare : t -> t -> int = compare
 
-let equal (a:t) (b:t) = a=b
+let equal : t -> t -> bool  = (=)
 
 let hash (a:t) = a

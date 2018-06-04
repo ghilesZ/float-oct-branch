@@ -19,6 +19,7 @@ open Syntax
 open Abstract_sig
 open Parameters
 open Mapext
+open Mystdlib
 
 module IdHash = Hashtbl.Make(Id)
 module IdSet  = Set.Make(Id)
@@ -79,13 +80,9 @@ module Soup(A:ABSTRACT) = struct
 
 
   (* priority queue *)
-
   type pqueue = IdSet.t FMap.t
 
-
   (* soup state, holding all partitions, elements and images *)
-
-
   type soup = {
       f: (abs -> abs list);        (* transfer function *)
       init: abs;                   (* initial environments *)
@@ -153,7 +150,6 @@ module Soup(A:ABSTRACT) = struct
 
 
 
-
   let out_update_elem (soup:soup) (elem:elem) =
     if !svg_show_partition then
       SVG.change_elem soup.svg (-elem.part.pid-1) soup.step elem.part.space SVG.Part;
@@ -170,7 +166,6 @@ module Soup(A:ABSTRACT) = struct
 
 
   (* priority queue managment *)
-
   let pqueue_add (soup:soup) (elem:elem) =
     if not elem.locked then
       let x = try FMap.find elem.coverage soup.queue with Not_found -> IdSet.empty in
@@ -205,8 +200,6 @@ module Soup(A:ABSTRACT) = struct
   let pqueue_size (soup:soup) : int =
     FMap.fold (fun _ set acc -> acc + IdSet.cardinal set) soup.queue 0
 
-
-
   (* compute the thighest useful bound of an element;
      it encloses initial eleemnts as well as images of elements;
      the removed points do not participate in constructing an invariant *)
@@ -219,11 +212,9 @@ module Soup(A:ABSTRACT) = struct
       elem.part.covers
       (A.meet elem.abs soup.init)
 
-
   (* compute the coverage of an element;
      - exact coverage: fully covered (true) not fully covered (false)
-     - approximate coverage, in [0,1] (not covered -> fully covered)
-   *)
+     - approximate coverage, in [0,1] (not covered -> fully covered) *)
   let elem_coverage (soup:soup) (elem:elem) : bool * float =
     (* cover part for a bit of image *)
     let cover_img iid (covered,cover,vol) =
@@ -259,8 +250,7 @@ module Soup(A:ABSTRACT) = struct
 
 
   (* returns the set of partition that covers elem's image;
-     useful as argument for elem_update
-   *)
+     useful as argument for elem_update *)
   let elem_img_contained (soup:soup) (elem:elem) : IdSet.t =
     IdSet.fold
       (fun iid parts ->
@@ -281,7 +271,6 @@ module Soup(A:ABSTRACT) = struct
         ) img.contained
      )
 
-
   (* recomputes the coverage information of an element *)
   let elem_update_coverage (soup:soup) (elem:elem) =
     let covered, coverage = elem_coverage soup elem in
@@ -300,7 +289,6 @@ module Soup(A:ABSTRACT) = struct
     IdSet.iter
       (fun pid -> elem_update_coverage soup (IdHash.find soup.elems pid))
       to_update
-
 
   (* recomputes elem's image and the covering information;
      must be given a (conservative) set of parts that encompase the new image;
@@ -458,8 +446,7 @@ module Soup(A:ABSTRACT) = struct
 
 
   (* create a new soup;
-     it has a single partition (universe)
-   *)
+     it has a single partition (universe) *)
   let create (f:abs -> abs list) (init:abs) (universe:abs) : soup =
     assert(A.subseteq init universe);
     (* SVG output *)
@@ -491,8 +478,7 @@ module Soup(A:ABSTRACT) = struct
 
   (* remove an abstract element from the soup;
      the partition where elem lives becomes empty;
-     updates the covering information
-   *)
+     updates the covering information *)
   let remove (soup:soup) (elem:elem) =
     (* remove part and image *)
     IdSet.iter (img_remove soup) elem.post;
@@ -516,8 +502,7 @@ module Soup(A:ABSTRACT) = struct
 
 
   (* tighten elements and their images, etc. recursively until a fixpoint ;
-     returns nb + the number of tightening/removal
-   *)
+     returns nb + the number of tightening/removal *)
   let rec tighten_fix (soup:soup) (elems:IdSet.t) nb =
     if IdSet.is_empty elems then nb else
     let pid = IdSet.min_elt elems in
@@ -537,14 +522,11 @@ module Soup(A:ABSTRACT) = struct
     tighten_fix soup elems nb
 
 
-
   (* removes an element and tigheten recursively *)
   let remove_and_tighten (soup:soup) (elem:elem) =
     let to_tighten = elem_img_contained soup elem in
     remove soup elem;
     ignore (tighten_fix soup (IdSet.remove elem.part.pid to_tighten) 0)
-
-
 
   (* tighten all elements, recursively, until a fixpoint is reached *)
   let tighten_all (soup:soup) =
@@ -554,9 +536,7 @@ module Soup(A:ABSTRACT) = struct
     if !do_validate_step then validate "tighten_all" soup
 
 
-
-  (* split the given element and refine the partition
-   *)
+  (* split the given element and refine the partition *)
   let split (soup:soup) (elem:elem) =
     let var,range = A.max_range elem.abs in
     if B.equal (fst range) (snd range) then
@@ -613,8 +593,6 @@ module Soup(A:ABSTRACT) = struct
       | _ -> failwith "TODO: cannot cut"
 
 
-
-
   (* remove unreachable from init *)
   let remove_unreachable (soup:soup) =
     (* depth-first search *)
@@ -643,8 +621,7 @@ module Soup(A:ABSTRACT) = struct
 
   (* remove elements that are reachable after more than max-nb application
      of post from init, where max is the maximum number of post to reach all
-     the reachable elements in the soup.
-   *)
+     the reachable elements in the soup. *)
   let remove_fringe (soup:soup) (nb:int) =
     (* breath-first search from init *)
     let rec doit level circle all =
@@ -687,8 +664,7 @@ module Soup(A:ABSTRACT) = struct
 
 
   (* extra refinement;
-     we resplit to avoid the image of an element to spread across too many partitions
-   *)
+     we resplit to avoid the image of an element to spread across too many partitions *)
   let resplit (soup:soup) (threshold:int) =
     let toresplit =
       IdHash.fold
@@ -707,22 +683,11 @@ module Soup(A:ABSTRACT) = struct
     if !do_validate_step then validate "resplit" soup
 
 
-
   (* number of elements covered and not covered in soup *)
   let coverage_stat (soup:soup) : int * int =
     IdHash.fold
       (fun pid elem (n1,n2) -> if elem.covered then n1+1, n2 else n1, n2+1)
       soup.elems (0,0)
-
-
-  let time = ref (Unix.gettimeofday ())
-  let start_timer () =
-    time := Unix.gettimeofday ()
-  let stop_timer (msg:string) =
-    let delta = Unix.gettimeofday () -. !time in
-    Printf.printf "  elapsed time for %s: %f s\n" msg delta;
-    delta
-
 
 
   (* solver *)
@@ -756,41 +721,35 @@ module Soup(A:ABSTRACT) = struct
         let elem = pqueue_pick soup in
         if !verbose_log then
           Printf.printf "iteration %i, %i elem(s), select %a"
-                        i ((pqueue_size soup) + 1) (print_elem soup) elem;
+            i ((pqueue_size soup) + 1) (print_elem soup) elem;
         (* handle the element *)
+        let initial = A.intersect elem.abs init in
         let small = B.lt (A.size elem.abs) !epsilon_size in
         let uncovered = elem.coverage <= !epsilon_cover in
-        let initial = A.intersect elem.abs init in
         let useless = IdSet.is_empty elem.part.covers in
         if !verbose_log then
-          Printf.printf " small=%B uncovered=%B initial=%B useless=%B"
+          Format.printf " small=%B uncovered=%B initial=%B useless=%B"
                         small uncovered initial useless;
-        if (uncovered || small || useless) && not initial then (
+        if not initial && (uncovered || small || useless) then (
           (* (too small or not enough covered) and not initial => remove *)
-          if !verbose_log then Printf.printf " => removed\n%!";
+          if !verbose_log then Format.printf " => removed\n%!";
           if !aggressive_tightening then remove_and_tighten soup elem
           else remove soup elem
         )
         else if small then (
           (* too small but initial => keep intact *)
-          if !verbose_log then Printf.printf " => kept\n%!";
+          if !verbose_log then Format.printf " => kept\n%!";
           elem.locked <- true
         )
         else (
           (* not too small, good enough coverage => split *)
-          if !verbose_log then Printf.printf " => split\n%!";
+          if !verbose_log then Format.printf " => split\n%!";
           split soup elem
          );
 
-        let m =
-          if i <= 10 then 1
-          else if i <= 100 then 10
-          else if i <= 1000 then 100
-          else if i <= 10000 then 1000
-          else 10000
-        in
+        let m = min 10000 (10. ** ((log10 (foi (i-1))) |> floor) |> iof) in
         if !svg_steps && i mod m = 0 then
-          SVG.save_image (Printf.sprintf "%s%s-%010i.svg" !svg_prefix step i) soup.svg;
+          SVG.save_image (Format.sprintf "%s%s-%010i.svg" !svg_prefix step i) soup.svg;
 
         (* next iteration *)
         iterate step (i+1)
@@ -798,10 +757,9 @@ module Soup(A:ABSTRACT) = struct
 
     (* perform iterations & clean the result *)
     let do_iteration step =
-      Printf.printf "  fixpoint search step %s\n" step;
-      Printf.printf "  epsilon_size: %f, epsilon_cover: %f\n"
+      Format.printf "  fixpoint search step %s\n" step;
+      Format.printf "  epsilon_size: %f, epsilon_cover: %f\n%!"
         (B.to_float_down !epsilon_size) !epsilon_cover;
-      flush stdout;
 
       iterate step 1;
 
@@ -813,18 +771,27 @@ module Soup(A:ABSTRACT) = struct
       remove_unreachable soup;
 
       let covered, noncovered = coverage_stat soup in
-      Printf.printf "  %i ELEMS: covered = %i, noncovered = %i\n" (covered+noncovered) covered noncovered;
-      if noncovered = 0 then Printf.printf "  => INDUCTIVE INVARIANT FOUND\n%!"
-      else Printf.printf "  => FAILED\n%!";
-      if !svg_result then SVG.save_image (Printf.sprintf "%s%s-result%s.svg" !svg_prefix step (if noncovered = 0 then "-ok" else "")) soup.svg;
+      Format.printf "  %i ELEMS: covered = %i, noncovered = %i\n"
+        (covered+noncovered)
+        covered
+        noncovered;
+      if noncovered = 0 then Format.printf "  => INDUCTIVE INVARIANT FOUND\n%!"
+      else Format.printf "  => FAILED\n%!";
+      if !svg_result then
+        SVG.save_image
+          (Format.sprintf "%s%s-result%s.svg"
+             !svg_prefix
+             step
+             (if noncovered = 0 then "-ok" else ""))
+          soup.svg;
     in
 
     (* first, find an inductive invariant *)
     let first_success = ref (-1) in
     let last_success = ref (-1) in
-    start_timer ();
+    Utils.start_timer ();
     do_iteration "0";
-    let total_time = ref (stop_timer "step 0") in
+    let total_time = ref (Utils.stop_timer "step 0") in
     let success_time = ref !total_time in
 
     (* then, refine the inductive invariant *)
@@ -842,16 +809,15 @@ module Soup(A:ABSTRACT) = struct
         if !last_success >= 0 then !max_refinement_steps else !max_search_steps
       in
       if step <= max_steps then (
-        start_timer ();
+        Utils.start_timer ();
         if noncovered = 0 then (
           (* success: try refining the result *)
-          Printf.printf "Refinement iteration %i\n" step;
-          flush stdout;
+          Format.printf "Refinement iteration %i\n%!" step;
 
-          for i=1 to !resplit_steps do
-            soup.step <- soup.step + 1;
-            resplit soup !resplit_threshold
-          done;
+          iter (fun () ->
+              soup.step <- soup.step+1;
+              resplit soup !resplit_threshold
+            ) () !resplit_steps;
 
           if !fringe_size > 0 then (
             soup.step <- soup.step + 1;
@@ -864,16 +830,15 @@ module Soup(A:ABSTRACT) = struct
           tighten_all soup;
 
           do_iteration (string_of_int step);
-         )
+        )
         else (
           (* failure: try again after split *)
-          Printf.printf "Retry iteration %i\n" step;
-          flush stdout;
+          Format.printf "Retry iteration %i\n%!" step;
 
-          for i=1 to !resplit_failed_steps do
-            soup.step <- soup.step + 1;
-            resplit soup !resplit_failed_threshold
-          done;
+          iter (fun () ->
+              soup.step <- soup.step + 1;
+              resplit soup !resplit_failed_threshold
+            ) () !resplit_failed_steps;
 
           soup.step <- soup.step + 1;
           remove_unreachable soup;
@@ -882,12 +847,12 @@ module Soup(A:ABSTRACT) = struct
 
           do_iteration (string_of_int step);
          );
-        let time = stop_timer (Printf.sprintf "step %i" step) in
+        let time = Utils.stop_timer (Format.sprintf "step %i" step) in
         if !last_success < 0 then
           success_time := !success_time +. time;
         total_time := !total_time +. time;
         refine_loop (step+1)
-       )
+      )
     in
     refine_loop 1;
 
@@ -895,11 +860,11 @@ module Soup(A:ABSTRACT) = struct
     (* check and print result *)
 
     if !last_success >= 0 then
-      Printf.printf "\nSUCCESS, first at step %i, last at step %i\nTime to first success: %f s\nTotal time: %f s\n" !first_success !last_success !success_time !total_time
+      Format.printf "\nSUCCESS, first at step %i, last at step %i\nTime to first success: %f s\nTotal time: %f s\n" !first_success !last_success !success_time !total_time
     else
-      Printf.printf "\nFAILURE after %i step(s)\nTotal time : %f s\n" !max_search_steps !total_time;
+      Format.printf "\nFAILURE after %i step(s)\nTotal time : %f s\n" !max_search_steps !total_time;
 
-    if !svg_result then SVG.save_image (Printf.sprintf "%sresult.svg" !svg_prefix) soup.svg;
-    if !svg_animation then SVG.save_animation (Printf.sprintf "%sanimation.svg" !svg_prefix) soup.svg
+    if !svg_result then SVG.save_image (Format.sprintf "%sresult.svg" !svg_prefix) soup.svg;
+    if !svg_animation then SVG.save_animation (Format.sprintf "%sanimation.svg" !svg_prefix) soup.svg
 
 end

@@ -121,7 +121,14 @@ module Box(I:ITV) = (struct
     | Nb aa, Nb bb -> meet aa bb
     | _ -> Bot
 
-
+  (* set difference *)
+  let diff (a:t) (b:t) : t list =
+    Env.fold2 (fun v i_a i_b acc ->
+        let s = I.diff i_a i_b in
+        List.fold_left (fun acc e ->
+            (Env.add v e a)::acc
+          ) acc s
+      ) a b []
 
   (* predicates *)
   (* ---------- *)

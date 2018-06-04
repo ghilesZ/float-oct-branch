@@ -57,7 +57,7 @@ let until f x0 pred =
   in aux x0
 
 (** fixpoint computation with equality *)
-let fixpoint f x0 = until f x0 ( = )
+let fixpoint f x0 = until f x0 (=)
 
 (** iterate n times f e*)
 let iter f e n =
@@ -219,6 +219,7 @@ module Format = struct
 
   include Format
 
+  (* few common separators *)
   let comma_sep = fun fmt () -> Format.fprintf fmt ","
   let newline_sep = fun fmt () -> Format.fprintf fmt "\n"
   let space_sep = fun fmt () -> Format.fprintf fmt "\n"
